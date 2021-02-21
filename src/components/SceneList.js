@@ -291,7 +291,12 @@ export default function SceneList() {
   return (
     <div className={classes.root}>
       {scenes.map((scene) => (
-        <SceneCard className={classes.card} scene={scene} />
+        <SceneCard
+          className={classes.card}
+          name={scene.Name}
+          image={scene.Picture.PictureUrl1}
+          text={scene.Description}
+        />
       ))}
     </div>
   );

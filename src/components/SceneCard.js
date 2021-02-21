@@ -17,7 +17,7 @@ const useStyles = makeStyles({
     "&:last-child": { paddingBottom: 16 },
   },
   title: { fontSize: "1.1em" },
-  description: {
+  text: {
     flex: 1,
     display: "-webkit-box",
     overflow: "hidden",
@@ -29,15 +29,17 @@ const useStyles = makeStyles({
 
 export default function SceneCard(props) {
   const {
-    scene,
+    name,
+    image,
+    text,
     className,
-    classes: propClass = { root: "", title: "", description: "" },
+    classes: propClass = { root: "", title: "", text: "" },
   } = props;
   const classes = useStyles();
 
   return (
     <Card className={`${classes.root} ${className} ${propClass.root}`}>
-      <CardMedia className={classes.media} image={scene.Picture.PictureUrl1} />
+      <CardMedia className={classes.media} image={image} />
       <div className={classes.contentContainer}>
         <CardContent className={classes.content}>
           <Typography
@@ -46,15 +48,15 @@ export default function SceneCard(props) {
             component="h2"
             className={`${classes.title} ${propClass.title}`}
           >
-            {scene.Name}
+            {name}
           </Typography>
           <Typography
-            className={`${classes.description} ${propClass.description}`}
+            className={`${classes.text} ${propClass.text}`}
             variant="body2"
             color="textSecondary"
             component="p"
           >
-            {scene.Description}
+            {text}
           </Typography>
         </CardContent>
       </div>
