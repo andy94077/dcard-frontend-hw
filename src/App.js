@@ -1,25 +1,33 @@
-import logo from './logo.svg';
-import './App.css';
+import React from "react";
+import { makeStyles } from "@material-ui/core/styles";
+import { Switch, Route, Redirect } from "react-router-dom";
 
-function App() {
+import Bar from "./Bar/Bar";
+import SceneList from "./components/SceneList";
+
+const useStyles = makeStyles({
+  root: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    flexDirection: "column",
+  },
+});
+
+export default function App() {
+  const classes = useStyles();
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className={classes.root}>
+      <Bar />
+      <Switch>
+        <Route exact path="/">
+          <Redirect to="/scenicSpot" />
+        </Route>
+        <Route exact path="/scenicSpot">
+          <SceneList />
+        </Route>
+      </Switch>
     </div>
   );
 }
-
-export default App;
