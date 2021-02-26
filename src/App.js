@@ -24,7 +24,7 @@ export default function App() {
         <Route exact path="/">
           <Redirect to="/scenicSpot" />
         </Route>
-        <Route exact path="/scenicSpot">
+        <Route path="/scenicSpot/:city?">
           <SceneList />
         </Route>
       </Switch>
