@@ -49,7 +49,6 @@ SERVER.interceptors.request.use((config) => {
     APP_KEY
   )}"`;
   config.headers["x-date"] = xDate;
-  console.log(config.headers.Authorization, config.headers["x-date"]);
   return config;
 });
 

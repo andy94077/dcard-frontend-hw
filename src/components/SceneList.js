@@ -1,12 +1,13 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import { Typography } from "@material-ui/core";
+import { Typography, useTheme } from "@material-ui/core";
 import { useParams } from "react-router-dom";
-import { useQuery } from "react-query";
+import { useInfiniteQuery } from "react-query";
+import ReactLoading from "react-loading";
+import { useInView } from "react-intersection-observer";
 
 import SceneCard from "./SceneCard";
 import { SERVER, CITIES } from "../config";
-import Loading from "./Loading";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -28,55 +29,94 @@ const useStyles = makeStyles((theme) => ({
 export default function SceneList() {
   const { city = "all" } = useParams();
   const classes = useStyles();
+  const theme = useTheme();
 
-  const { isLoading, isError, isLoadingError, data: scenes, error } = useQuery(
+  const { ref: nextPageRef, inView } = useInView();
+  const {
+    isLoading,
+    isFetchingNextPage,
+    isError,
+    isLoadingError,
+    fetchNextPage,
+    data: scenes,
+    error,
+  } = useInfiniteQuery(
     ["scenes", city],
-    async () => {
+    async (page) => {
       const { data } = await SERVER.get(
         city === "all" || city === "" || city === undefined
           ? "/ScenicSpot"
           : `/ScenicSpot/${city}`,
         {
-          params: { $top: 30, $format: "JSON" },
+          params: {
+            $top: 30,
+            $skip: page.pageParam || 0,
+            $format: "JSON",
+          },
         }
       );
       return data;
     },
-    { retry: false }
+    {
+      retry: false,
+      getNextPageParam(lastPage, pages) {
+        return lastPage.length === 0 ? undefined : pages.length * 30;
+      },
+    }
   );
+
+  useEffect(() => {
+    if (inView) fetchNextPage();
+  }, [inView]);
 
   if (isError || isLoadingError) {
     return (
       <Typography className={classes.badRequest} variant="h4">
-        Bad Request. <br />
-        Please Enter the Right City.
+        {error.response ? (
+          <>
+            Bad Request.
+            <br /> Please enter the right city.
+          </>
+        ) : (
+          <>
+            Connection Failed.
+            <br /> Please check your Internet connection.
+          </>
+        )}
       </Typography>
     );
   }
-  if (isLoading) {
-    return <Loading mode="linear" />;
-  }
+  if (isLoading)
+    return <ReactLoading type="bubbles" color={theme.palette.primary.main} />;
 
-  console.log("scenes", scenes);
   return (
-    <div className={classes.root}>
-      {scenes
-        .filter(
-          (scene) =>
-            city === undefined ||
-            city === "" ||
-            city === "all" ||
-            scene.City === CITIES[city]
-        )
-        .map((scene) => (
-          <SceneCard
-            key={scene.ID}
-            className={classes.card}
-            name={scene.Name}
-            image={scene.Picture.PictureUrl1}
-            text={scene.Description}
-          />
-        ))}
-    </div>
+    <>
+      <div className={classes.root}>
+        {scenes.pages.map((page) =>
+          page
+            .filter(
+              (scene) =>
+                city === undefined ||
+                city === "" ||
+                city === "all" ||
+                scene.City === CITIES[city]
+            )
+            .map((scene) => (
+              <SceneCard
+                key={scene.ID}
+                className={classes.card}
+                name={scene.Name}
+                image={scene.Picture.PictureUrl1}
+                text={scene.Description}
+              />
+            ))
+        )}
+      </div>
+      <div ref={nextPageRef}>
+        {isFetchingNextPage && (
+          <ReactLoading type="bubbles" color={theme.palette.primary.main} />
+        )}
+      </div>
+    </>
   );
 }
